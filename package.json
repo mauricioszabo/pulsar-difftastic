@@ -1,0 +1,10 @@
+{
+  "name": "difftastic-pr-review",
+  "version": "0.1.0",
+  "description": "Review GitHub pull requests with Difftastic and local line drafts",
+  "main": "./lib/main",
+  "dependencies": { "atom-select-list": "^0.7.0" },
+  "scripts": { "test": "node --test" },
+  "engines": { "atom": ">=1.131.0 <2.0.0" },
+  "deserializers": { "DifftasticPrReview": "deserializeReview" }
+}
