@@ -1,4 +1,4 @@
-# Difftastic PR Review for Pulsar
+# Difftastic for Pulsar
 
 Open a GitHub pull request in a native Pulsar tab, inspect Difftastic's side-by-side changes, and post review comments directly to GitHub.
 
@@ -6,7 +6,7 @@ Open a GitHub pull request in a native Pulsar tab, inspect Difftastic's side-by-
 
 You need Pulsar 1.131 or newer, GitHub CLI (`gh`), and Difftastic (`difft`). Use Difftastic 0.71 or newer with JSON line alignment. Install the package's npm dependencies with `npm install`.
 
-From the extracted `difftastic-pr-review` directory:
+From the extracted `difftastic` directory:
 
 ```sh
 gh auth status || gh auth login
@@ -14,7 +14,7 @@ npm install
 pulsar -p link
 ```
 
-Reload Pulsar. In the command palette, run **Difftastic Pr Review: Open** to open a new review tab. Enter a GitHub.com PR URL or `owner/repo#123`. Run it again to open additional tabs without replacing existing reviews. **Difftastic Pr Review: Open PR on Current Branch** uses the active editor's file to find its Git repository and current branch; it opens the only matching PR directly or shows a fuzzy-searchable picker when there are several. PRs in any state are included (up to 100). For a desktop launch with a different `PATH`, set the executable paths in the package settings.
+Reload Pulsar. In the command palette, run **Difftastic: Open Pull Request** to open a new review tab. Enter a GitHub.com PR URL or `owner/repo#123`. Run it again to open additional tabs without replacing existing reviews. **Difftastic: Open Current Branch Pull Request** uses the active editor's file to find its Git repository and current branch; it opens the only matching PR directly or shows a fuzzy-searchable picker when there are several. PRs in any state are included (up to 100). For a desktop launch with a different `PATH`, set the executable paths in the package settings.
 
 ## Review
 
@@ -24,4 +24,4 @@ Reload Pulsar. In the command palette, run **Difftastic Pr Review: Open** to ope
 - **Local drafts** lists drafts saved by older versions of this package. Current-revision drafts can be posted to GitHub or deleted; earlier-revision drafts can only be deleted. New comments are not saved as local drafts.
 - Large files, binary files, and submodules may have limited structural output. The patch view is available whenever GitHub supplies a text patch.
 
-Legacy drafts are saved in the Pulsar config directory under `difftastic-pr-review/drafts`. Posting a comment writes to GitHub using your `gh` account. The package accepts GitHub.com PRs, including private repositories accessible to that account.
+Legacy drafts are saved in the Pulsar config directory under `difftastic/drafts`. Posting a comment writes to GitHub using your `gh` account. The package accepts GitHub.com PRs, including private repositories accessible to that account.

@@ -33,7 +33,7 @@ test('Open creates independent tabs; branch command selects a PR without replaci
   let nextId = 0;
   let matches = [];
   class FakeReview {
-    static uri = 'atom://difftastic-pr-review/review';
+    static uri = 'atom://difftastic/review';
     static newURI() { return `${this.uri}/${++nextId}`; }
     constructor(state) { this.uri = state.uri; }
     focusAddress() { this.focused = true; }
@@ -54,17 +54,17 @@ test('Open creates independent tabs; branch command selects a PR without replaci
     delete require.cache[main];
     const pkg = require('../lib/main');
     pkg.activate();
-    await commands['difftastic-pr-review:open']();
-    await commands['difftastic-pr-review:open']();
+    await commands['difftastic:open-pull-request']();
+    await commands['difftastic:open-pull-request']();
     assert.notEqual(opened[0].uri, opened[1].uri);
     assert.equal(opened[0].focused, true);
     assert.equal(opened[1].focused, true);
     assert.equal(atom.opener('atom://another/package'), undefined);
     matches = [{url: 'https://github.com/a/b/pull/1'}];
-    await commands['difftastic-pr-review:open-pr-on-current-branch']();
+    await commands['difftastic:open-current-branch-pull-request']();
     assert.equal(opened[2].url, matches[0].url);
     matches = [{url: 'https://github.com/a/b/pull/1'}, {url: 'https://github.com/a/b/pull/2'}];
-    await commands['difftastic-pr-review:open-pr-on-current-branch']();
+    await commands['difftastic:open-current-branch-pull-request']();
     assert.equal(opened.length, 3);
     assert.equal(pkg.picker.prs.length, 2);
     pkg.picker.onSelect(matches[1]);
