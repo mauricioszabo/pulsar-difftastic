@@ -9,6 +9,16 @@
   "deserializers": { "Difftastic": "deserializeReview" },
   "configSchema": {
     "ghPath": { "type": "string", "default": "gh", "title": "GitHub CLI executable" },
-    "difftPath": { "type": "string", "default": "difft", "title": "Difftastic executable" }
+    "difftPath": { "type": "string", "default": "difft", "title": "Difftastic executable" },
+    "scrollBehavior": {
+      "type": "string",
+      "default": "soft-wrap",
+      "title": "Scroll behavior",
+      "enum": [
+        { "value": "soft-wrap", "description": "Soft wrap" },
+        { "value": "individual", "description": "Individual scroll" },
+        { "value": "sync", "description": "Sync scroll" }
+      ]
+    }
   }
 }
