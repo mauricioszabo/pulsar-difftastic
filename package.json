@@ -6,5 +6,19 @@
   "dependencies": { "atom-select-list": "^0.7.0" },
   "scripts": { "test": "node --test" },
   "engines": { "atom": ">=1.131.0 <2.0.0" },
-  "deserializers": { "Difftastic": "deserializeReview" }
+  "deserializers": { "Difftastic": "deserializeReview" },
+  "configSchema": {
+    "ghPath": { "type": "string", "default": "gh", "title": "GitHub CLI executable" },
+    "difftPath": { "type": "string", "default": "difft", "title": "Difftastic executable" },
+    "scrollBehavior": {
+      "type": "string",
+      "default": "soft-wrap",
+      "title": "Scroll behavior",
+      "enum": [
+        { "value": "soft-wrap", "description": "Soft wrap" },
+        { "value": "individual", "description": "Individual scroll" },
+        { "value": "sync", "description": "Sync scroll" }
+      ]
+    }
+  }
 }
