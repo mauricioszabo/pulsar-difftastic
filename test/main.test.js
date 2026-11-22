@@ -34,13 +34,13 @@ test('Open creates independent tabs; branch command selects a PR without replaci
   let matches = [];
   class FakeReview {
     static uri = 'atom://difftastic/review';
-    static newURI() { return `${this.uri}/${++nextId}`; }
-    constructor(state) { this.uri = state.uri; }
+    static newURI(provider) { return `${this.uri}/${provider}/${++nextId}`; }
+    constructor(state) { this.uri = state.uri; this.provider = state.provider; }
     focusAddress() { this.focused = true; }
     open(url) { this.url = url; }
   }
   class FakePicker {
-    constructor(prs, branch, onSelect) { this.prs = prs; this.onSelect = onSelect; this.branch = branch; }
+    constructor(prs, branch, provider, onSelect) { this.prs = prs; this.onSelect = onSelect; this.branch = branch; this.provider = provider; }
     destroy() { this.onClose?.(); }
   }
   try {
@@ -70,6 +70,17 @@ test('Open creates independent tabs; branch command selects a PR without replaci
     pkg.picker.onSelect(matches[1]);
     await new Promise(resolve => setImmediate(resolve));
     assert.equal(opened[3].url, matches[1].url);
+    assert.equal(opened[3].provider, 'github');
+    await commands['difftastic:open-merge-request']();
+    assert.equal(opened[4].provider, 'gitlab');
+    assert.equal(opened[4].focused, true);
+    matches = [{url: 'https://gitlab.com/a/b/-/merge_requests/3'}, {url: 'https://gitlab.com/a/b/-/merge_requests/4'}];
+    await commands['difftastic:open-current-branch-merge-request']();
+    assert.equal(pkg.picker.provider.service, 'GitLab');
+    pkg.picker.onSelect(matches[0]);
+    await new Promise(resolve => setImmediate(resolve));
+    assert.equal(opened[5].provider, 'gitlab');
+    assert.equal(opened[5].url, matches[0].url);
     pkg.deactivate();
   } finally {
     Module._load = originalLoad;

@@ -9,6 +9,7 @@
   "deserializers": { "Difftastic": "deserializeReview" },
   "configSchema": {
     "ghPath": { "type": "string", "default": "gh", "title": "GitHub CLI executable" },
+    "glabPath": { "type": "string", "default": "glab", "title": "GitLab CLI executable" },
     "difftPath": { "type": "string", "default": "difft", "title": "Difftastic executable" },
     "scrollBehavior": {
       "type": "string",
