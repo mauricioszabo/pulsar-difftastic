@@ -9,7 +9,8 @@ test('Reload fetches posted comments and deleting one removes it without a succe
   const viewPath = require.resolve('../lib/review-view');
   const githubPath = require.resolve('../lib/github');
   const draftsPath = require.resolve('../lib/drafts');
-  const originalCache = [viewPath, githubPath, draftsPath].map(key => require.cache[key]);
+  const providersPath = require.resolve('../lib/providers');
+  const originalCache = [viewPath, githubPath, draftsPath, providersPath].map(key => require.cache[key]);
   const originalLoad = Module._load;
   const originalAtom = global.atom;
   const originalDocument = global.document;
@@ -54,8 +55,10 @@ test('Reload fetches posted comments and deleting one removes it without a succe
     require.cache[draftsPath] = {id: draftsPath, filename: draftsPath, loaded: true,
       exports: class { async list() { return []; } }};
     delete require.cache[viewPath];
+    delete require.cache[providersPath];
     const ReviewView = require('../lib/review-view');
     const view = Object.create(ReviewView.prototype);
+    view.provider = require('../lib/providers').github;
     view.emitter = {emit() {}};
     view.address = {value: ''};
     view.results = new Map();
@@ -95,7 +98,7 @@ test('Reload fetches posted comments and deleting one removes it without a succe
     Module._load = originalLoad;
     global.atom = originalAtom;
     global.document = originalDocument;
-    [viewPath, githubPath, draftsPath].forEach((key, index) => {
+    [viewPath, githubPath, draftsPath, providersPath].forEach((key, index) => {
       if (originalCache[index]) require.cache[key] = originalCache[index];
       else delete require.cache[key];
     });

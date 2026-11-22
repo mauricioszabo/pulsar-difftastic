@@ -7,6 +7,7 @@ const os = require('node:os');
 const path = require('node:path');
 const {execFileSync} = require('node:child_process');
 const {pullRequestsForEditor} = require('../lib/branch-prs');
+const {pullRequestsForBranch} = require('../lib/github');
 
 test('finds PRs for the active editor repository and branch, including closed PRs', async t => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'dpr-branch-test-'));
@@ -20,7 +21,7 @@ test('finds PRs for the active editor repository and branch, including closed PR
   const gh = path.join(root, 'fake-gh');
   const argsPath = path.join(root, 'args.json');
   fs.writeFileSync(gh, `#!/usr/bin/env node\nrequire('fs').writeFileSync(${JSON.stringify(argsPath)}, JSON.stringify({args: process.argv.slice(2), cwd: process.cwd()}));\nconsole.log(JSON.stringify([{number: 12, title: 'Fix tests', url: 'https://github.com/a/b/pull/12', state: 'CLOSED', isDraft: false}]));\n`, {mode: 0o755});
-  const result = await pullRequestsForEditor({getPath: () => file}, gh);
+  const result = await pullRequestsForEditor({getPath: () => file}, (root, branch) => pullRequestsForBranch(root, branch, gh));
   assert.equal(result.branch, 'feature/review');
   assert.equal(result.prs[0].number, 12);
   const call = JSON.parse(fs.readFileSync(argsPath, 'utf8'));
@@ -30,10 +31,11 @@ test('finds PRs for the active editor repository and branch, including closed PR
 });
 
 test('reports missing editor paths and non-repository files', async t => {
-  await assert.rejects(pullRequestsForEditor(null, 'gh'), /Open a file/);
+  const list = async () => assert.fail('The provider must not be called');
+  await assert.rejects(pullRequestsForEditor(null, list), /Open a file/);
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'dpr-no-git-'));
   t.after(() => fs.rmSync(root, {recursive: true, force: true}));
   const file = path.join(root, 'file');
   fs.writeFileSync(file, '');
-  await assert.rejects(pullRequestsForEditor({getPath: () => file}, 'gh'), /not in a Git repository/);
+  await assert.rejects(pullRequestsForEditor({getPath: () => file}, list), /not in a Git repository/);
 });
