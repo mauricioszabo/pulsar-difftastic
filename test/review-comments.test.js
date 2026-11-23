@@ -26,7 +26,7 @@ test('Reload fetches posted comments and deleting one removes it without a succe
   const ref = {key: 'a/b#1', url: 'https://github.com/a/b/pull/1', repository: 'repos/a/b', number: 1};
   const analysis = {head: 'a'.repeat(40), metadata: {base: {sha: 'b'.repeat(40)}}, files: [{filename: 'file.js'}]};
   global.atom = {
-    config: {get: () => 'gh'}, getConfigDirPath: () => '/tmp', confirm: () => 1,
+    config: {get: () => 'gh'}, project: {getPaths: () => []}, getConfigDirPath: () => '/tmp', confirm: () => 1,
     notifications: {addSuccess: () => { notices++; }}
   };
   try {

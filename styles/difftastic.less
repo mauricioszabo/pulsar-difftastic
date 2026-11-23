@@ -221,7 +221,9 @@
     padding: 9px 13px;
   }
   .dpr-current-file { min-width: 0; flex-wrap: wrap; overflow-wrap: anywhere; }
-  .dpr-current-file code { font-weight: 650; }
+  .dpr-current-file code, .dpr-local-file-link { font-weight: 650; }
+  .dpr-local-file-link { color: var(--dpr-accent); text-decoration: none; }
+  .dpr-local-file-link:hover { text-decoration: underline; }
   .dpr-modes { gap: 4px; }
   .dpr-empty { padding: 44px 20px 16px; text-align: center; overflow-wrap: anywhere; }
   .dpr-empty h3, .dpr-drafts h3 { font: 650 17px/1.35 system-ui, sans-serif; }
