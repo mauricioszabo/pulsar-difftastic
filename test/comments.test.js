@@ -20,6 +20,7 @@ test('posts an immediate review comment using stdin, and rejects invalid or stal
   let deletes = 0;
   let fields;
   let argv;
+  let graphqlFails = false;
   childProcess.execFile = (binary, args, options, callback) => {
     assert.equal(binary, 'gh');
     assert.equal(args[4], 'GET');
@@ -29,6 +30,17 @@ test('posts an immediate review comment using stdin, and rejects invalid or stal
   childProcess.execFile[promisify.custom] = async (binary, args) => {
     assert.equal(binary, 'gh');
     const endpoint = args.at(-1);
+    if (args[1] === 'graphql') {
+      if (graphqlFails) throw new Error('GraphQL is unavailable');
+      assert.deepEqual(args.slice(4), ['-F', 'owner=a', '-F', 'name=b', '-F', 'number=1']);
+      return {stdout: JSON.stringify({data: {repository: {pullRequest: {reviewThreads: {
+        pageInfo: {hasNextPage: false, endCursor: null},
+        nodes: [
+          {isResolved: true, isOutdated: false, comments: {nodes: [{databaseId: 33}]}},
+          {isResolved: true, isOutdated: true, comments: {nodes: [{databaseId: 35}, {databaseId: 36}]}}
+        ]
+      }}}}}), stderr: ''};
+    }
     if (args[4] === 'DELETE') {
       assert.equal(endpoint, 'repos/a/b/pulls/comments/33');
       deletes++;
@@ -40,9 +52,11 @@ test('posts an immediate review comment using stdin, and rejects invalid or stal
       {id: 33, body: 'Current', path: 'src/file.js', side: 'LEFT', line: 1, position: 1}
     ]), stderr: ''};
     if (endpoint.endsWith('comments?per_page=100&page=2')) return {stdout: JSON.stringify([
-      {id: 34, body: 'Outdated', path: 'src/file.js', side: 'LEFT', line: 1, position: null},
+      {id: 34, body: 'Outdated', path: 'src/file.js', side: 'LEFT', line: 1, position: null,
+        diff_hunk: '@@ -1,2 +1,2 @@\n-old\n+new\n', original_line: 1},
       {id: 35, body: 'Other side', path: 'src/file.js', side: 'RIGHT', line: 1, position: 1},
-      {id: 36, body: 'Outside patch', path: 'src/file.js', side: 'RIGHT', line: 40, position: 1}
+      {id: 36, body: 'Outside patch', path: 'src/file.js', side: 'RIGHT', line: 40, position: 1,
+        in_reply_to_id: 35}
     ]), stderr: ''};
     return {stdout: JSON.stringify({head: {sha: latestHead}, base: {sha: base}}), stderr: ''};
   };
@@ -87,8 +101,17 @@ test('posts an immediate review comment using stdin, and rejects invalid or stal
     latestHead = 'c'.repeat(40);
     await assert.rejects(postReviewComment(ref, analysis, anchor, body, 'gh'), /changed since it was loaded/);
     assert.equal(posts, 2);
+    // Outdated comments survive the load so the Resolved issues panel can show them.
     const loaded = await loadReviewComments(ref, analysis, 'gh');
-    assert.deepEqual(loaded.map(item => item.id), [33, 35]);
+    assert.deepEqual(loaded.map(item => [item.id, item.outdated, item.resolved, item.thread]),
+      [[33, false, true, 33], [34, true, false, 34], [35, false, true, 35], [36, true, true, 35]]);
+    assert.equal(loaded[1].hunk, '@@ -1,2 +1,2 @@\n-old\n+new\n');
+    assert.equal(loaded[1].originalLine, 1);
+    graphqlFails = true;
+    const degraded = await loadReviewComments(ref, analysis, 'gh');
+    assert.deepEqual(degraded.map(item => [item.id, item.outdated, item.resolved, item.thread]),
+      [[33, false, false, 33], [34, true, false, 34], [35, false, false, 35], [36, true, false, 35]]);
+    graphqlFails = false;
     await deleteReviewComment(ref, 33, 'gh');
     assert.equal(deletes, 1);
     await assert.rejects(deleteReviewComment(ref, '33', 'gh'), /Invalid review comment ID/);
